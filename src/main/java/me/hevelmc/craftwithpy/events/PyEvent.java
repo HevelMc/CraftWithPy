@@ -4,6 +4,7 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
 import me.hevelmc.craftwithpy.Main;
+import me.hevelmc.craftwithpy.Script;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
@@ -62,10 +63,13 @@ public class PyEvent implements Listener {
         }
     }
 
-    public static boolean registerNewEvent(String eventName) {
+    public static boolean registerNewEvent(String eventName, String script_name, String function_name) {
         for (Class<? extends Event> event : availableEvents) {
             if (event.getName().endsWith("." + eventName)) {
                 registerEventClass(event);
+                Script script = Main.getScript(script_name);
+                if (script == null) return false;
+                script.addEventMethod(eventName, function_name);
                 return true;
             }
         }

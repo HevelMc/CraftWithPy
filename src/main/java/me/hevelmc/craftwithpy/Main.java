@@ -20,8 +20,16 @@ public class Main extends JavaPlugin {
 
     public static void sendEvent(Event event) {
         for (Script script : scriptsList) {
-            script.runFunctionHandle("on_event", event);
+            ArrayList<String> methods = script.getEventMethods(event.getEventName());
+            if (methods != null) for (String eventMethod : methods) script.runFunctionHandle(eventMethod, event);
         }
+    }
+
+    public static Script getScript(String script_name) {
+        for (Script script : scriptsList) {
+            if (script.getName().equals(script_name)) return script;
+        }
+        return null;
     }
 
     public static void loadEnabledScripts(String path, boolean recursive) {
@@ -61,7 +69,7 @@ public class Main extends JavaPlugin {
         loadEnabledScripts("Scripts/", false);
 
         Bukkit.getConsoleSender().sendMessage(
-                "§7------ ------ ------ ------§r"
+                "\n§7------ ------ ------ ------§r"
                 + "\n§2CraftWithPy has been enabled!§r"
                 + "\n§3 - Enjoy your code!§r"
                 + "\n§7------ ------ ------ ------§r"

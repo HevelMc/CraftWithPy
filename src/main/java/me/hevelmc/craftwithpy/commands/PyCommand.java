@@ -11,9 +11,8 @@ import java.util.Arrays;
 
 public class PyCommand implements CommandExecutor {
 
-    private static final DCommandExecutor executor = new DCommandExecutor();
-
-    public static void registerNewCommand(String cmd, String usage, String desc, String permission, String[] aliases) {
+    public static void registerNewCommand(String cmd, String script_name, String function_name, String usage, String desc, String permission, String[] aliases) {
+        DCommandExecutor executor = new DCommandExecutor(script_name, function_name);
         new DCommand(cmd, usage, desc, permission, Arrays.asList(aliases), executor, Main.INSTANCE);
     }
 
@@ -27,7 +26,9 @@ public class PyCommand implements CommandExecutor {
     public static void enableScript(String name, CommandSender s) {
         if (scriptExists(name)) {
             if (scriptEnabled(name)) return;
-            Main.getScriptsList().add(new Script(name.toLowerCase()));
+            Script script = new Script(name.toLowerCase());
+            Main.getScriptsList().add(script);
+            script.enable();
             s.sendMessage("§aScript §b" + name + "§a successfully enabled!");
         } else s.sendMessage("§cScript §b" + name + "§c does not exit.");
     }
@@ -35,7 +36,7 @@ public class PyCommand implements CommandExecutor {
     public static void disableScript(String name, CommandSender s) {
         if (scriptExists(name)) {
             if (!scriptEnabled(name)) return;
-            Script script = getScript(name);
+            Script script = Main.getScript(name);
             if (script != null) {
                 script.disable();
                 Main.getScriptsList().remove(script);
@@ -62,12 +63,7 @@ public class PyCommand implements CommandExecutor {
     }
 
     public static boolean scriptEnabled(String name) {
-        return getScript(name) != null;
-    }
-
-    public static Script getScript(String name) {
-        for (Script script : Main.getScriptsList()) if (script.getName().equalsIgnoreCase(name)) return script;
-        return null;
+        return Main.getScript(name) != null;
     }
 
     public static boolean scriptExists(String name) {

@@ -7,14 +7,17 @@ import org.python.core.PyMethod;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Script implements Listener {
     private final String name;
     private final PythonInterpreter interpreter = new PythonInterpreter();
+    private final HashMap<String, ArrayList<String>> eventMethods = new HashMap<>();
     private PyObject instance;
 
     public Script(String name) {
         this.name = name;
-        enable();
     }
 
     public String getName() {
@@ -22,8 +25,8 @@ public class Script implements Listener {
     }
 
     public void enable() {
-        Bukkit.getPluginManager().registerEvents(this, Main.INSTANCE);
         interpreter.cleanup();
+        Bukkit.getPluginManager().registerEvents(this, Main.INSTANCE);
         try {
             // Encoding
             interpreter.exec("# -*- coding: iso-8859-1 -*-");
@@ -62,6 +65,17 @@ public class Script implements Listener {
             return message.toString();
         }
         return null;
+    }
+
+    public void addEventMethod(String event, String method) {
+        ArrayList<String> methods = eventMethods.get(event);
+        if (methods == null) methods = new ArrayList<>();
+        methods.add(method);
+        eventMethods.put(event, methods);
+    }
+
+    public ArrayList<String> getEventMethods(String event) {
+        return eventMethods.get(event);
     }
 
     public void disable() {
