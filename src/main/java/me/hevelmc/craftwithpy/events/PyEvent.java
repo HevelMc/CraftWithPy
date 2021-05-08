@@ -48,7 +48,7 @@ public class PyEvent implements Listener {
     }
 
     public static void registerEventClass(Class<? extends Event> eventClass) {
-        for (Method method : eventClass.getDeclaredMethods()) {
+        for (Method method : eventClass.getMethods()) {
             if (method.getParameterCount() == 0 && method.getName().equals("getHandlers")) {
                 try {
                     Method getHandlerListMethod = eventClass.getMethod("getHandlerList");
