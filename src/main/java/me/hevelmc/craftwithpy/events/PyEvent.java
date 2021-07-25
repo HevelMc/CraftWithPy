@@ -1,8 +1,5 @@
 package me.hevelmc.craftwithpy.events;
 
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ClassInfoList;
 import me.hevelmc.craftwithpy.Main;
 import me.hevelmc.craftwithpy.Script;
 import org.bukkit.Bukkit;
@@ -11,10 +8,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
+import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Set;
 
 import static org.bukkit.Bukkit.getLogger;
 
@@ -24,27 +23,13 @@ public class PyEvent implements Listener {
     private static final EventExecutor executor = (ignored, event) -> Main.sendEvent(event);
 
     public static void initAllEvents() {
-        ClassInfoList events = new ClassGraph()
-                .enableClassInfo()
-                .scan() //TODO We should use try-catch-resources here instead
-                .getClassInfo(Event.class.getName())
-                .getSubclasses()
-                .filter(info -> !info.isAbstract());
 
-        try {
-            for (ClassInfo event : events) {
-                //noinspection unchecked
-                Class<? extends Event> eventClass = (Class<? extends Event>) Class.forName(event.getName());
+        Reflections reflections = new Reflections("org.bukkit.event");
+        Set<Class<? extends Event>> allEvents = reflections.getSubTypesOf(Event.class);
 
-                availableEvents.add(eventClass);
-            }
+        availableEvents.addAll(allEvents);
 
-        } catch (ClassNotFoundException e) {
-            throw new AssertionError("Scanned class wasn't found", e);
-        }
-
-        getLogger().info("Events found: " + events.size());
-        getLogger().info("HandlerList size: " + HandlerList.getHandlerLists().size());
+        getLogger().info("Events found: " + allEvents.size());
     }
 
     public static void registerEventClass(Class<? extends Event> eventClass) {
